@@ -1,0 +1,124 @@
+@baseUrl = http://localhost:3000
+
+### Logins iniciais dos usuários do seed (rode estes 3 antes dos testes)
+
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@chamados.com",
+  "password": "123456"
+}
+
+###
+@tokenAdmin = {{loginAdmin.response.body.token}}
+
+# @name loginAna
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana@chamados.com",
+  "password": "123456"
+}
+
+###
+@tokenAna = {{loginAna.response.body.token}}
+
+# @name loginBruno
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "bruno@chamados.com",
+  "password": "123456"
+}
+
+###
+@tokenBruno = {{loginBruno.response.body.token}}
+
+
+### T1 - Cadastro válido (resposta sem senha) -> 201
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "nome": "Mariana Silva",
+  "email": "mariana@chamados.com",
+  "password": "123456"
+}
+
+### T2 - Cadastro com e-mail repetido -> 409
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "nome": "Ana Duplicada",
+  "email": "ana@chamados.com",
+  "password": "123456"
+}
+
+### T3 - Login com senha errada -> 401
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana@chamados.com",
+  "password": "senha_errada"
+}
+
+### T4 - Rota protegida sem token -> 401
+GET {{baseUrl}}/auth/me
+
+### T4 (variação 1) - Header sem Bearer -> 401
+GET {{baseUrl}}/auth/me
+Authorization: TokenErrado 12345
+
+### T4 (variação 2) - Token inválido/adulterado -> 401
+GET {{baseUrl}}/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzYyNjg3ODAwLCJleHAiOjE3NjI2OTUwMDB9.assinatura_invalida
+
+### T5 - Rota protegida com token válido -> 200
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{tokenAna}}
+
+### T6 - Criar chamado tentando mandar o dono no body (deve ser ignorado) -> 201
+POST {{baseUrl}}/chamados
+Authorization: Bearer {{tokenAna}}
+Content-Type: application/json
+
+{
+  "titulo": "Mouse parou de funcionar",
+  "problema": "O mouse da bancada 8 não responde.",
+  "prioridade": "BAIXA",
+  "usuarioId": 1
+}
+
+### T7 - USER (Ana) tentando alterar chamado de outro USER (Bruno, id 3) -> 403
+PUT {{baseUrl}}/chamados/3
+Authorization: Bearer {{tokenAna}}
+Content-Type: application/json
+
+{
+  "titulo": "Tentando editar chamado do Bruno",
+  "problema": "Deve retornar 403 Forbidden."
+}
+
+### T8 - USER em rota de ADMIN -> 403
+GET {{baseUrl}}/users
+Authorization: Bearer {{tokenAna}}
+
+### T9 - ADMIN em rota de ADMIN -> 200
+GET {{baseUrl}}/users
+Authorization: Bearer {{tokenAdmin}}
+
+### T10 - Recurso inexistente (404 antes de 403) -> 404
+PUT {{baseUrl}}/chamados/9999
+Authorization: Bearer {{tokenAna}}
+Content-Type: application/json
+
+{
+  "titulo": "Chamado que não existe",
+  "problema": "Deve retornar 404."
+}

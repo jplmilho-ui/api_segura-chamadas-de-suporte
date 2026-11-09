@@ -1,0 +1,30 @@
+{
+  "name": "api-chamados-suporte",
+  "version": "1.0.0",
+  "description": "API REST de Chamados de Suporte protegida com JWT, bcryptjs, Express 5 e Prisma 7 (SQLite) - 3º AI ETECAMP",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "seed": "npx prisma db seed"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.js"
+  },
+  "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.0.0",
+    "@prisma/client": "^7.0.0",
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^12.4.1",
+    "dotenv": "^16.4.5",
+    "express": "^5.0.1",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "prisma": "^7.0.0",
+    "tsx": "^4.19.2"
+  },
+  "overrides": {
+    "better-sqlite3": "^12.4.1"
+  }
+}

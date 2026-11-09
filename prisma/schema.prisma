@@ -1,0 +1,49 @@
+// Prisma 7 Schema — Tema 5: Chamados de Suporte (ETECAMP 3º AI)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum StatusChamado {
+  ABERTO
+  EM_ANDAMENTO
+  FECHADO
+}
+
+enum Prioridade {
+  BAIXA
+  MEDIA
+  ALTA
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  nome      String
+  email     String    @unique
+  password  String
+  role      Role      @default(USER)
+  criadoEm  DateTime  @default(now())
+  chamados  Chamado[]
+}
+
+model Chamado {
+  id              Int           @id @default(autoincrement())
+  titulo          String
+  problema        String
+  prioridade      Prioridade    @default(MEDIA)
+  status          StatusChamado @default(ABERTO)
+  respostaTecnica String?
+  usuarioId       Int
+  usuario         User          @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  criadoEm        DateTime      @default(now())
+  atualizadoEm    DateTime      @updatedAt
+}
